@@ -1,0 +1,33 @@
+---
+- hosts: all
+
+  tasks:
+    - name: Creating Directory
+      ansible.builtin.file:
+        path: /home/arthur/testes
+        state: directory
+
+    - name: Copying wordtesting.conf
+      ansible.builtin.copy:
+        src: files/wordtesting.conf
+        dest: /home/arthur/testes/wordtesting.conf
+        force: no
+
+    - name: Obtendo novos salts da API do WordPress
+      ansible.builtin.uri:
+        url: https://api.wordpress.org/secret-key/1.1/salt/
+        return_content: yes
+      register: wp_salts
+
+    - name: criando arquivo com salts
+      ansible.builtin.copy:
+        dest: /home/arthur/testes/wordalt
+        content: "{{ wp_salts.content }}"
+
+    #depois ver pq eu so peguei pelo gemini kkk
+    - name: Localizar e substituir o bloco de salts padrão
+      ansible.builtin.replace:
+        path: /home/arthur/testes/wordtesting.conf
+        # O regex abaixo localiza o bloco inteiro de 'put your unique phrase here'
+        regexp: "(?s)define\\( 'AUTH_KEY'.*define\\( 'NONCE_SALT',\\s+'put your unique phrase here' \\);"
+        replace: "{{ wp_salts.content }}"
