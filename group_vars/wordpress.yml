@@ -1,0 +1,3 @@
+---
+wp_db_host: "192.168.18.204"
+wp_dir: "/srv/www/wordpress"

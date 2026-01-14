@@ -45,8 +45,8 @@
       become: yes
 
     - name: Configuring Apache (seding file to server)
-      ansible.builtin.copy:
-        src: files/wordpress.conf
+      ansible.builtin.template:
+        src: templates/wordpress.conf.j2
         dest: /etc/apache2/sites-available/000-default.conf
       become: yes
       notify:
