@@ -21,7 +21,8 @@
           - php-imagick 
           - php-intl 
           - php-json 
-          - php-mbstring 
+          - php-mbstring
+          - php-mysql 
           - php-xml 
           - php-zip
         update_cache: yes
@@ -68,6 +69,7 @@
       - {regexp: "database_name_here", replace: "wordpress_db"}
       - {regexp: "username_here", replace: "wordpress_user"}
       - {regexp: "password_here", replace: "12345"}
+      - {regexp: "localhost", replace: "192.168.18.204"}
       become: yes
 
     - name: Getting new salts from WordPress API
@@ -100,6 +102,14 @@
     #   become: yes
       
 - hosts: mysql
+
+  handlers:
+    - name: Restart mysql
+      service:
+        name: mysql
+        state: restarted
+      become: yes
+
   tasks:
     - name: Install dependences
       ansible.builtin.apt:
@@ -124,7 +134,21 @@
         priv: "wordpress_db.*:SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,ALTER"
         state: present
         login_unix_socket: /run/mysqld/mysqld.sock
+        host: "{{ item }}"
+      with_items:
+        - "localhost"
+        - "127.0.0.1"
+        - "192.168.18.205"
       become: yes
+
+    - name: Configuring MySQL to listen on all interfaces
+      ansible.builtin.replace:
+        path: /etc/mysql/mysql.conf.d/mysqld.cnf
+        regexp: "127.0.0.1"
+        replace: "0.0.0.0"
+      become: yes
+      notify:
+        - Restart mysql
 
 
 
