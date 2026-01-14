@@ -78,9 +78,10 @@
 
     - name: Configuring file to “known secrets” attacks
       ansible.builtin.replace:
-        path: /home/arthur/testes/wordtesting.conf
+        path: /srv/www/wordpress/wp-config.php
         regexp: "(?s)define\\( 'AUTH_KEY'.*define\\( 'NONCE_SALT',\\s+'put your unique phrase here' \\);"
         replace: "{{ wp_salts.content }}"
+      become: yes
 
     # - name: Configuring file to “known secrets” attacks
     #   ansible.builtin.lineinfile:
